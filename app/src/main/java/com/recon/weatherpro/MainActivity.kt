@@ -38,6 +38,10 @@ class MainActivity : AppCompatActivity() {
     lateinit var day1 : TextView
     lateinit var day2 : TextView
     lateinit var day3 : TextView
+    lateinit var image : ImageView
+    lateinit var imageD1 : ImageView
+    lateinit var imageD2 : ImageView
+    lateinit var imageD3 : ImageView
 
     var lat : Float = 0.0f
     var lon : Float = 0.0f
@@ -52,10 +56,17 @@ class MainActivity : AppCompatActivity() {
         updateInfo = findViewById(R.id.tvUpdated)
         windInfo = findViewById(R.id.tvWind)
         pogodaInfo = findViewById(R.id.tvPogoda)
-        day1 = findViewById(R.id.tvDay1)
-        day2 = findViewById(R.id.tvDay2)
-        day3 = findViewById(R.id.tvDay3)
 
+        day1 = findViewById(R.id.tvDay1)
+        imageD1 = findViewById(R.id.imgDay1)
+
+        day2 = findViewById(R.id.tvDay2)
+        imageD2 = findViewById(R.id.imgDay2)
+
+        day3 = findViewById(R.id.tvDay3)
+        imageD3 = findViewById(R.id.imgDay3)
+
+        image = findViewById(R.id.currentImage)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -80,17 +91,24 @@ class MainActivity : AppCompatActivity() {
             {
                 response ->
                 Log.d("MyLog", "Received JSON: $response")
-
-                              val obj = JSONObject(response)
-                               var locationObj = obj.getJSONObject("location")
-                               var currentObj = obj.getJSONObject("current")
-                                val dayTextViews = arrayOf(day1, day2, day3)
-                               tempInfo.text = currentObj.getString("temp_c") + " C°"
-                               updateInfo.text = currentObj.getString("last_updated")
-                               cityInfo.text = locationObj.getString("name")
-                               windInfo.text = "Wind : " + currentObj.getString("wind_mph") +
-                                               " " + currentObj.getString("wind_dir")
-                               pogodaInfo.text = currentObj.getJSONObject("condition").getString("text")
+                val obj = JSONObject(response)
+                var locationObj = obj.getJSONObject("location")
+                var currentObj = obj.getJSONObject("current")
+                val imageUrl = "https:" + currentObj.getJSONObject("condition").getString("icon")
+                val dayTextViews = arrayOf(day1, day2, day3)
+                val dayImgViews = arrayOf(imageD1, imageD2, imageD3)
+                tempInfo.text = currentObj.getString("temp_c") + " C°"
+                updateInfo.text = currentObj.getString("last_updated")
+                cityInfo.text = locationObj.getString("name")
+                windInfo.text = "Wind : " + currentObj.getString("wind_mph") +
+                               " " + currentObj.getString("wind_dir")
+                pogodaInfo.text = currentObj.getJSONObject("condition").getString("text")
+                // Используйте Coil для загрузки изображения и отображения его в ImageView
+                image.load(imageUrl) {
+                    crossfade(true) // Добавление плавного перехода при загрузке изображения
+                    placeholder(R.drawable.placeholder) // Установка плейсхолдера, если изображение еще не загружено
+                    error(R.drawable.error) // Установка изображения ошибки, если загрузка не удалась
+                }
 
 try{
                 val forecastArray = obj.getJSONObject("forecast").getJSONArray("forecastday")
@@ -106,11 +124,21 @@ try{
 
                     // Теперь у вас есть доступ к данным для текущего дня
                     Log.d("MyLog","Date: $date")
+                    Log.d("MyLog","icon: ${forecastDayObj.getJSONObject("day")
+                                                    .getJSONObject("condition")
+                                                    .getString("icon")}")
                     Log.d("MyLog","Max Temp C: $maxTempC")
                     Log.d("MyLog","Min Temp C: $minTempC")
                     Log.d("MyLog","Condition Text: $conditionText \n\n\n")
 
+                    val imgUrl = "https:" + dayObj.getJSONObject("condition").getString("icon")
                     val dayTextView = dayTextViews[i]
+                    val dayImg = dayImgViews[i]
+                    dayImg.load(imgUrl) {
+                        crossfade(true) // Добавление плавного перехода при загрузке изображения
+                        placeholder(R.drawable.placeholder) // Установка плейсхолдера, если изображение еще не загружено
+                        error(R.drawable.error) // Установка изображения ошибки, если загрузка не удалась
+                    }
                     dayTextView.text = "Date: $date\nMax Temp: $maxTempC°C\nMin Temp: $minTempC°C\nCondition: $conditionText"
                 }
             } catch (e: JSONException) {

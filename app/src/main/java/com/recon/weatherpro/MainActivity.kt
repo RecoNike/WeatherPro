@@ -184,4 +184,39 @@ class MainActivity : AppCompatActivity() {
         queue.add(stringRequest)
     }
 
+    override fun onRestart() {
+        super.onRestart()
+
+        LocationUtils.getCurrentLocation(
+            this,
+            { latitude, longitude ->
+                lat = latitude
+                lon = longitude
+                Log.e("MyTag", "Координаты работают!! :\n $lat \t $lon")
+            },
+            {
+                Toast.makeText(applicationContext, "Location error", Toast.LENGTH_SHORT).show()
+            }
+        )
+        getResult(lat.toString(), lon.toString())
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        LocationUtils.getCurrentLocation(
+            this,
+            { latitude, longitude ->
+                lat = latitude
+                lon = longitude
+                Log.e("MyTag", "Координаты работают!! :\n $lat \t $lon")
+            },
+            {
+                Toast.makeText(applicationContext, "Location error", Toast.LENGTH_SHORT).show()
+            }
+        )
+        getResult(lat.toString(), lon.toString())
+
+    }
 }

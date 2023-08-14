@@ -95,7 +95,8 @@ class MainActivity : AppCompatActivity() {
             },
             {
                 Toast.makeText(applicationContext, "Location error", Toast.LENGTH_SHORT).show()
-            }
+            },
+            true
         )
 
         getButton.setOnClickListener {

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.os.Handler
 import android.provider.Settings
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -17,13 +18,14 @@ object LocationUtils {
     fun getCurrentLocation(
         activity: FragmentActivity,
         onLocationReceived: (Float, Float) -> Unit,
-        onLocationError: () -> Unit
+        onLocationError: () -> Unit,
+        forceUpdate: Boolean = false // Параметр по умолчанию установлен в false
     ) {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(activity)
 
         if (checkPermission(activity)) {
-            if (isLocationEnabled(activity)) {
+            if (forceUpdate || isLocationEnabled(activity)) { // Проверяем параметр forceUpdate
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(activity) { task ->
                     val location: Location? = task.result
                     if (location == null) {
@@ -43,6 +45,7 @@ object LocationUtils {
             requestPermission(activity, PERMISSION_REQUEST_ACCESS_LOCATION)
         }
     }
+
 
     fun isLocationEnabled(context: Context): Boolean {
         val locationManager: LocationManager =
@@ -73,5 +76,5 @@ object LocationUtils {
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
-    private const val PERMISSION_REQUEST_ACCESS_LOCATION = 100
+    var PERMISSION_REQUEST_ACCESS_LOCATION = (100..120).random()
 }

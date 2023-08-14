@@ -1,12 +1,16 @@
 package com.recon.weatherpro
 
 import android.content.Context
+import android.location.LocationListener
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
@@ -15,26 +19,37 @@ import com.google.android.gms.location.LocationServices
 
 object LocationUtils {
 
+    private const val TAG = "LocationUtils"
+
     fun getCurrentLocation(
         activity: FragmentActivity,
         onLocationReceived: (Float, Float) -> Unit,
         onLocationError: () -> Unit,
-        forceUpdate: Boolean = false // Параметр по умолчанию установлен в false
+        forceUpdate: Boolean = true // Параметр по умолчанию установлен в false
     ) {
-        val fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(activity)
+        val locationManager = activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         if (checkPermission(activity)) {
-            if (forceUpdate || isLocationEnabled(activity)) { // Проверяем параметр forceUpdate
-                fusedLocationProviderClient.lastLocation.addOnCompleteListener(activity) { task ->
-                    val location: Location? = task.result
-                    if (location == null) {
-                        onLocationError.invoke()
-                    } else {
-                        val lat = location.latitude.toFloat()
-                        val lon = location.longitude.toFloat()
-                        onLocationReceived.invoke(lat, lon)
-                    }
+            if (forceUpdate || isLocationEnabled(activity)) {
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, object : LocationListener {
+                        override fun onLocationChanged(location: Location) {
+                            val lat = location.latitude.toFloat()
+                            val lon = location.longitude.toFloat()
+                            onLocationReceived.invoke(lat, lon)
+                            locationManager.removeUpdates(this)
+                        }
+
+                        override fun onProviderDisabled(provider: String) {
+                            onLocationError.invoke()
+                        }
+
+                        override fun onProviderEnabled(provider: String) {}
+
+                        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                    })
+                } else {
+                    onLocationError.invoke()
                 }
             } else {
                 onLocationError.invoke()
@@ -45,8 +60,6 @@ object LocationUtils {
             requestPermission(activity, PERMISSION_REQUEST_ACCESS_LOCATION)
         }
     }
-
-
     fun isLocationEnabled(context: Context): Boolean {
         val locationManager: LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -76,5 +89,5 @@ object LocationUtils {
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
-    var PERMISSION_REQUEST_ACCESS_LOCATION = (100..120).random()
+    val PERMISSION_REQUEST_ACCESS_LOCATION = (100..120).random()
 }

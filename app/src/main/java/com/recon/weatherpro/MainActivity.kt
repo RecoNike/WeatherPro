@@ -203,7 +203,7 @@ class MainActivity : AppCompatActivity() {
         val channelId = "my_channel_id"
         val channelName = "My Channel"
         val channelDescription = "My Channel Description"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val importance = NotificationManager.IMPORTANCE_HIGH
 
         val channel = NotificationChannel(channelId, channelName, importance).apply {
             description = channelDescription
@@ -222,6 +222,7 @@ class MainActivity : AppCompatActivity() {
             .setContentTitle(notificationTitle)
             .setContentText(notificationText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVibrate(longArrayOf(0))
 
         // Отправка уведомления
         val notificationId = 1 // Уникальный ID для каждого уведомления

@@ -1,6 +1,10 @@
 package com.recon.weatherpro
 
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +12,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.core.view.WindowCompat
 import coil.load
 import com.android.volley.Request
@@ -43,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     var lat: Float = 51.50853f
     var lon: Float = -0.12574f
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -107,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun getResult(lati: String, lont: String) {
         var url = "https://api.weatherapi.com/v1/forecast.json" +
                 "?key=$API_KEY" +
@@ -129,6 +137,10 @@ class MainActivity : AppCompatActivity() {
                 windInfo.text = "Ветер : " + currentObj.getString("wind_mph") +
                         " " + currentObj.getString("wind_dir")
                 pogodaInfo.text = currentObj.getJSONObject("condition").getString("text")
+
+                showNotifiation(currentObj.getString("temp_c") + " C°", locationObj.getString("name"), currentObj.getJSONObject("condition").getString("text"))
+
+
                 // Используйте Coil для загрузки изображения и отображения его в ImageView
                 image.load(imageUrl) {
                     crossfade(true) // Добавление плавного перехода при загрузке изображения
@@ -182,8 +194,41 @@ class MainActivity : AppCompatActivity() {
                 Log.d("MyLog", "We get this: $it")
             })
         queue.add(stringRequest)
+
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun showNotifiation(temp:String, city:String, descript:String){
+        val channelId = "my_channel_id"
+        val channelName = "My Channel"
+        val channelDescription = "My Channel Description"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+        val channel = NotificationChannel(channelId, channelName, importance).apply {
+            description = channelDescription
+        }
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        val notificationTitle = "$city"
+        val notificationText = "$descript\n$temp"
+        val smallIcon = R.drawable.cloudy
+
+        // Создание уведомления
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(smallIcon)
+            .setContentTitle(notificationTitle)
+            .setContentText(notificationText)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        // Отправка уведомления
+        val notificationId = 1 // Уникальный ID для каждого уведомления
+        notificationManager.notify(notificationId, notificationBuilder.build())
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRestart() {
         super.onRestart()
 
@@ -202,6 +247,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
 

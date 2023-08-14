@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
                 tempInfo.text = currentObj.getString("temp_c") + " C°"
                 updateInfo.text = currentObj.getString("last_updated")
                 cityInfo.text = locationObj.getString("name")
-                windInfo.text = "Wind : " + currentObj.getString("wind_mph") +
+                windInfo.text = "Ветер : " + currentObj.getString("wind_mph") +
                         " " + currentObj.getString("wind_dir")
                 pogodaInfo.text = currentObj.getJSONObject("condition").getString("text")
                 // Используйте Coil для загрузки изображения и отображения его в ImageView
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                             error(R.drawable.error) // Установка изображения ошибки, если загрузка не удалась
                         }
                         dayTextView.text =
-                            "Date: $date\nMax Temp: $maxTempC°C\nMin Temp: $minTempC°C\nCondition: $conditionText"
+                            "Дата: $date\nМакс.темп.: $maxTempC°C\nМин.темп : $minTempC°C\nОписание: $conditionText"
                     }
                 } catch (e: JSONException) {
                     e.printStackTrace()

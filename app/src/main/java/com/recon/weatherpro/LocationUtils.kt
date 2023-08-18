@@ -89,5 +89,5 @@ object LocationUtils {
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
-    val PERMISSION_REQUEST_ACCESS_LOCATION = (100..120).random()
+    val PERMISSION_REQUEST_ACCESS_LOCATION = (100)
 }
